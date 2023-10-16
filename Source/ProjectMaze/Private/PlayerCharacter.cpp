@@ -50,7 +50,7 @@ void APlayerCharacter::StartMoveForward(const FInputActionInstance& Value)
 {
 	
 	if ((Controller) && (IsAiming)){
-		AddMovementInput(FVector(GetActorForwardVector()), 0.5);
+		AddMovementInput(FVector(GetActorForwardVector()), 0.4);
 		MoveInputPressed = true;
 		MoveInputReleased = false;
 	}
@@ -83,8 +83,8 @@ void APlayerCharacter::StartMoveBackward(const FInputActionInstance& Value)
 
 void APlayerCharacter::StopMoveBackward()
 {
-		MoveBackInputPressed = false;
-		MoveBackInputReleased = true;
+	MoveBackInputPressed = false;
+	MoveBackInputReleased = true;
 }
 
 void APlayerCharacter::StrafeRight(const FInputActionInstance& Value)
@@ -94,7 +94,7 @@ void APlayerCharacter::StrafeRight(const FInputActionInstance& Value)
 	{
 		StrafeRightInputPressed = true;
 		StrafeRightInputReleased = false;
-		AddMovementInput(FVector(GetActorRightVector()), 0.25);
+		AddMovementInput(FVector(GetActorRightVector()), 0.3);
 	}
 }
 
@@ -105,9 +105,21 @@ void APlayerCharacter::StrafeLeft(const FInputActionInstance& Value)
 	{
 		StrafeLeftInputPressed = true;
 		StrafeLeftInputReleased = false;
-		AddMovementInput(FVector(GetActorRightVector() * -1), 0.25);
+		AddMovementInput(FVector(GetActorRightVector() * -1), 0.3);
 	}
 	
+}
+
+void APlayerCharacter::StopStrafeRight()
+{
+	StrafeRightInputPressed = false;
+	StrafeRightInputReleased = true;
+}
+
+void APlayerCharacter::StopStrafeLeft()
+{
+	StrafeLeftInputPressed = false;
+	StrafeLeftInputReleased = true;
 }
 
 void APlayerCharacter::Turn(const FInputActionValue& Value)
@@ -126,18 +138,6 @@ void APlayerCharacter::LookUp(const FInputActionValue& Value)
 void APlayerCharacter::Fire(const FInputActionInstance& Value){
 
 	FireInputPressed = true;
-}
-
-void APlayerCharacter::StopStrafeRight()
-{
-	StrafeRightInputPressed = false;
-	StrafeRightInputReleased = true;
-}
-
-void APlayerCharacter::StopStrafeLeft()
-{
-	StrafeLeftInputPressed = false;
-	StrafeLeftInputReleased = true;
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
