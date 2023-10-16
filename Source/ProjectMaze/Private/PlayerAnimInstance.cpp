@@ -14,13 +14,16 @@ void UPlayerAnimInstance::NativeInitializeAnimation()
 	PlayerCharacter = Cast<APlayerCharacter>(TryGetPawnOwner());
 	if (IsValid(PlayerCharacter))
 		PlayerMovementComponent = PlayerCharacter->GetCharacterMovement();
+		// CameraBoom = PlayerCharacter->CameraBoom;
+		// PlayerCurrentVelocity = PlayerCharacter->GetVelocity();
+		// PlayerCurrentRotation = PlayerCharacter->GetActorRotation();
 }
 
 void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
-	if (IsValid(PlayerMovementComponent) && IsValid(PlayerCharacter))
+	if (IsValid(PlayerMovementComponent))
 		GroundSpeed = UKismetMathLibrary::VSizeXY(PlayerMovementComponent->Velocity);
-		// AimingPitch =  PlayerCharacter->CameraBoom->GetTargetRotation().Pitch;
-		// Direction = UKismetAnimationLibrary::CalculateDirection(PlayerCharacter->GetVelocity(), PlayerCharacter->GetActorRotation());
+		// AimingPitch =  CameraBoom->GetTargetRotation().Pitch;
+		// Direction = UKismetAnimationLibrary::CalculateDirection(PlayerCurrentVelocity, PlayerCurrentRotation);
 }

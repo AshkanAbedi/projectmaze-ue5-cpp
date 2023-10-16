@@ -87,7 +87,7 @@ private:
 	UPROPERTY(EditAnywhere) float MaxPitch;
 	UPROPERTY(EditAnywhere, Category = "Camera") float CurrentCameraBoomLength;
 	UPROPERTY(EditAnywhere, Category = "Camera") float DefaultCameraBoomLength = 130.f;
-	UPROPERTY(EditAnywhere, Category = "Camera") float RunningCameraBoomLength = 180.f;
+	UPROPERTY(EditAnywhere, Category = "Camera") float RunningCameraBoomLength = 200.f;
 	UPROPERTY(EditAnywhere, Category = "Camera") float CameraBoomInterpolationSpeed = 1.f;
 	
 };

@@ -10,6 +10,7 @@ class APlayerCharacter;
 class UCharacterMovementComponent;
 
 
+
 UCLASS()
 class PROJECTMAZE_API UPlayerAnimInstance : public UAnimInstance
 {
@@ -21,9 +22,9 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly) TObjectPtr<APlayerCharacter> PlayerCharacter;
 	UPROPERTY(BlueprintReadOnly) TObjectPtr<UCharacterMovementComponent> PlayerMovementComponent;
-	UPROPERTY(BlueprintReadOnly) double GroundSpeed;
-	UPROPERTY(BlueprintReadOnly) double Direction;
-	UPROPERTY(BlueprintReadOnly) double AimingPitch;
+	UPROPERTY(BlueprintReadWrite) double GroundSpeed;
+	UPROPERTY(BlueprintReadWrite) double Direction;
+	UPROPERTY(BlueprintReadWrite) double AimingPitch;
 
 protected:
 

@@ -9,6 +9,7 @@
 #include "Camera/CameraShakeSourceComponent.h"
 #include "Components/TimelineComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -49,15 +50,14 @@ void APlayerCharacter::StartMoveForward(const FInputActionInstance& Value)
 {
 	
 	if ((Controller) && (IsAiming)){
-		AddMovementInput(FVector(GetActorForwardVector()), 0.25);
+		AddMovementInput(FVector(GetActorForwardVector()), 0.5);
 		MoveInputPressed = true;
 		MoveInputReleased = false;
 	}
 	else if ((Controller) && (!IsAiming)) {
-		const float CurrentMaxSpeed = MovementSpeedCurve->GetFloatValue(Value.GetTriggeredTime());
-		GetCharacterMovement()->MaxWalkSpeed = CurrentMaxSpeed;
-		AddMovementInput(FVector(GetActorForwardVector()), GetCharacterMovement()->GetMaxSpeed());
-		CurrentCameraBoomLength = RunningCameraBoomLength;
+		AddMovementInput(FVector(GetActorForwardVector()), MovementSpeedCurve->GetFloatValue(Value.GetTriggeredTime()));
+		if (UKismetMathLibrary::VSizeXY(GetCharacterMovement()->Velocity) > 250.f)
+			CurrentCameraBoomLength = RunningCameraBoomLength;
 		MoveInputPressed = true;
 		MoveInputReleased = false;
 	}
