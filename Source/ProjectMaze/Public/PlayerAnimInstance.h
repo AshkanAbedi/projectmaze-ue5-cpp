@@ -22,6 +22,8 @@ public:
 	UPROPERTY(BlueprintReadOnly) TObjectPtr<APlayerCharacter> PlayerCharacter;
 	UPROPERTY(BlueprintReadOnly) TObjectPtr<UCharacterMovementComponent> PlayerMovementComponent;
 	UPROPERTY(BlueprintReadOnly) double GroundSpeed;
+	UPROPERTY(BlueprintReadOnly) double Direction;
+	UPROPERTY(BlueprintReadOnly) double AimingPitch;
 
 protected:
 

@@ -2,6 +2,8 @@
 
 
 #include "PlayerAnimInstance.h"
+#include "KismetAnimationLibrary.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "PlayerCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -17,6 +19,8 @@ void UPlayerAnimInstance::NativeInitializeAnimation()
 void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
-	if (IsValid(PlayerMovementComponent))
+	if (IsValid(PlayerMovementComponent) && IsValid(PlayerCharacter))
 		GroundSpeed = UKismetMathLibrary::VSizeXY(PlayerMovementComponent->Velocity);
+		// AimingPitch =  PlayerCharacter->CameraBoom->GetTargetRotation().Pitch;
+		// Direction = UKismetAnimationLibrary::CalculateDirection(PlayerCharacter->GetVelocity(), PlayerCharacter->GetActorRotation());
 }

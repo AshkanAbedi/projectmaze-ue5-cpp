@@ -36,8 +36,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon") TObjectPtr<USkeletalMeshComponent> WeaponSkeletalMesh;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon") TObjectPtr<USceneComponent> LaserPoint;
 
-	
-	
 protected:
 	virtual void BeginPlay() override;
 	
@@ -91,6 +89,5 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Camera") float DefaultCameraBoomLength = 130.f;
 	UPROPERTY(EditAnywhere, Category = "Camera") float RunningCameraBoomLength = 180.f;
 	UPROPERTY(EditAnywhere, Category = "Camera") float CameraBoomInterpolationSpeed = 1.f;
-	
 	
 };
