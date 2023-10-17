@@ -76,6 +76,7 @@ protected:
 	void Turn(const FInputActionValue& Value);
 	void LookUp(const FInputActionValue& Value);
 	void Fire(const FInputActionInstance& Value);
+	void StopFire();
 	void ChangeCameraAngle();
 	void StartAim();
 	void StopAim();

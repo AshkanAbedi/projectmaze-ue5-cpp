@@ -140,6 +140,11 @@ void APlayerCharacter::Fire(const FInputActionInstance& Value){
 	FireInputPressed = true;
 }
 
+void APlayerCharacter::StopFire()
+{
+	FireInputPressed = false;
+}
+
 // ReSharper disable once CppMemberFunctionMayBeConst
 void APlayerCharacter::ChangeCameraAngle()
 {
@@ -213,7 +218,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	EnhancedInputComponent->BindAction(InputLookUp, ETriggerEvent::Triggered, this, &APlayerCharacter::LookUp);
 	EnhancedInputComponent->BindAction(InputAim, ETriggerEvent::Started, this, &APlayerCharacter::StartAim);
 	EnhancedInputComponent->BindAction(InputAim, ETriggerEvent::Completed, this, &APlayerCharacter::StopAim);
-	EnhancedInputComponent->BindAction(InputFire, ETriggerEvent::Started, this, &APlayerCharacter::Fire);
+	EnhancedInputComponent->BindAction(InputFire, ETriggerEvent::Triggered, this, &APlayerCharacter::Fire);
+	EnhancedInputComponent->BindAction(InputFire, ETriggerEvent::Completed, this, &APlayerCharacter::StopFire);
 	EnhancedInputComponent->BindAction(InputChangeCameraAngle, ETriggerEvent::Started, this, &APlayerCharacter::ChangeCameraAngle);
 
 	
