@@ -10,7 +10,6 @@
 #include "Components/TimelineComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "BulletSpawner.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -36,17 +35,17 @@ APlayerCharacter::APlayerCharacter()
 	WeaponSkeletalMesh->SetupAttachment(GetMesh());
 	LaserPoint = CreateDefaultSubobject<USceneComponent>(TEXT("Laser Point"));
 	LaserPoint->SetupAttachment(WeaponSkeletalMesh);
-	BulletSpawner = CreateDefaultSubobject<ABulletSpawner>(TEXT("Bullet Spawner"));
-	
+	BulletSpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("Bullet Spawn Point"));
+	BulletSpawnPoint->SetupAttachment(WeaponSkeletalMesh);
 }
 
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	if (IsValid(WeaponSkeletalMesh) && IsValid(LaserPoint) && IsValid (BulletSpawner))
+	if (IsValid(WeaponSkeletalMesh) && IsValid(LaserPoint) && IsValid (BulletSpawnPoint))
 		WeaponSkeletalMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("WeaponSocket"));
 		LaserPoint->AttachToComponent(WeaponSkeletalMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("LaserPointSocket"));
-		BulletSpawner->AttachToComponent(WeaponSkeletalMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale,  FName("BulletSpawner"));
+		BulletSpawnPoint->AttachToComponent(WeaponSkeletalMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale,  FName("BulletSpawnPointSocket"));
 }
 
 void APlayerCharacter::StartMoveForward(const FInputActionInstance& Value)
@@ -141,7 +140,7 @@ void APlayerCharacter::LookUp(const FInputActionValue& Value)
 void APlayerCharacter::Fire(const FInputActionInstance& Value)
 {
 	FireInputPressed = true;
-	BulletSpawner->FireBullet(BulletSpawner->GetActorLocation(), BulletSpawner->GetActorRotation());
+	
 }
 
 void APlayerCharacter::StopFire()

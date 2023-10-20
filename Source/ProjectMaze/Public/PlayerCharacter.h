@@ -15,7 +15,6 @@ class UInputAction;
 class UCurveFloat;
 class UCameraShakeSourceComponent;
 class UTimelineComponent;
-class ABulletSpawner;
 
 UCLASS()
 class PROJECTMAZE_API APlayerCharacter : public ACharacter
@@ -33,14 +32,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Timeline") TObjectPtr<UCurveFloat> CameraZoomInCurve;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Timeline") TObjectPtr<UCurveFloat> CameraZoomOutCurve;
-	UPROPERTY(VisibleAnywhere, Category = "Timeline") TObjectPtr<UTimelineComponent> TimelineComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Timeline") TObjectPtr<UTimelineComponent> TimelineComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement") TObjectPtr<UCurveFloat> MovementSpeedCurve;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon") TObjectPtr<USkeletalMeshComponent> WeaponSkeletalMesh;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon") TObjectPtr<USceneComponent> LaserPoint;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon") TObjectPtr<USceneComponent> BulletSpawnPoint;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon") float LaserTraceDistance;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon") TObjectPtr<ABulletSpawner> BulletSpawner;
+
 
 protected:
 	virtual void BeginPlay() override;
