@@ -10,6 +10,7 @@
 #include "Components/TimelineComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "BulletSpawner.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -35,15 +36,17 @@ APlayerCharacter::APlayerCharacter()
 	WeaponSkeletalMesh->SetupAttachment(GetMesh());
 	LaserPoint = CreateDefaultSubobject<USceneComponent>(TEXT("Laser Point"));
 	LaserPoint->SetupAttachment(WeaponSkeletalMesh);
+	BulletSpawner = CreateDefaultSubobject<ABulletSpawner>(TEXT("Bullet Spawner"));
 	
 }
 
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	if (IsValid(WeaponSkeletalMesh) && IsValid(LaserPoint))
+	if (IsValid(WeaponSkeletalMesh) && IsValid(LaserPoint) && IsValid (BulletSpawner))
 		WeaponSkeletalMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("WeaponSocket"));
 		LaserPoint->AttachToComponent(WeaponSkeletalMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("LaserPointSocket"));
+		BulletSpawner->AttachToComponent(WeaponSkeletalMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale,  FName("BulletSpawner"));
 }
 
 void APlayerCharacter::StartMoveForward(const FInputActionInstance& Value)
@@ -135,9 +138,10 @@ void APlayerCharacter::LookUp(const FInputActionValue& Value)
 		CameraBoom->AddLocalRotation(FRotator(Value.GetMagnitude(),0,0));
 }
 
-void APlayerCharacter::Fire(const FInputActionInstance& Value){
-
+void APlayerCharacter::Fire(const FInputActionInstance& Value)
+{
 	FireInputPressed = true;
+	BulletSpawner->FireBullet(BulletSpawner->GetActorLocation(), BulletSpawner->GetActorRotation());
 }
 
 void APlayerCharacter::StopFire()
@@ -199,6 +203,11 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	CameraBoom->TargetArmLength = FMath::FInterpTo(CameraBoom->TargetArmLength, CurrentCameraBoomLength, DeltaTime, CameraBoomInterpolationSpeed);
+
+	if (IsAiming)
+		bHitSomething = GetWorld()->LineTraceSingleByChannel(HitResult, LaserPoint->GetComponentLocation(), LaserPoint->GetComponentLocation() + (LaserPoint->GetForwardVector() * LaserTraceDistance), ECC_Visibility, LaserTraceParams);
+		DrawDebugLine(GetWorld(), LaserPoint->GetComponentLocation(), LaserPoint->GetComponentLocation() + (LaserPoint->GetForwardVector() * LaserTraceDistance), FColor::Red, false, -1.f, 0, 1.f);
+		LaserPoint->SetWorldRotation(CameraBoom->GetTargetRotation());
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

@@ -15,6 +15,7 @@ class UInputAction;
 class UCurveFloat;
 class UCameraShakeSourceComponent;
 class UTimelineComponent;
+class ABulletSpawner;
 
 UCLASS()
 class PROJECTMAZE_API APlayerCharacter : public ACharacter
@@ -29,12 +30,17 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera") TObjectPtr<USpringArmComponent> CameraBoom;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera") TObjectPtr<UCameraComponent> MainCamera;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera") TObjectPtr<UCameraShakeSourceComponent> CameraShakeSourceComponent;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Timeline") TObjectPtr<UCurveFloat> CameraZoomInCurve;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Timeline") TObjectPtr<UCurveFloat> CameraZoomOutCurve;
 	UPROPERTY(VisibleAnywhere, Category = "Timeline") TObjectPtr<UTimelineComponent> TimelineComponent;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement") TObjectPtr<UCurveFloat> MovementSpeedCurve;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon") TObjectPtr<USkeletalMeshComponent> WeaponSkeletalMesh;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon") TObjectPtr<USceneComponent> LaserPoint;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon") float LaserTraceDistance;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon") TObjectPtr<ABulletSpawner> BulletSpawner;
 
 protected:
 	virtual void BeginPlay() override;
@@ -63,8 +69,7 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool AimInputReleased = false;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool FireInputPressed = false;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool IsAiming = false;
-
-
+	
 	void StartMoveForward(const FInputActionInstance& Value);
 	void StopMoveForward();
 	void StartMoveBackward(const FInputActionInstance& Value);
@@ -90,5 +95,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Camera") float DefaultCameraBoomLength = 130.f;
 	UPROPERTY(EditAnywhere, Category = "Camera") float RunningCameraBoomLength = 200.f;
 	UPROPERTY(EditAnywhere, Category = "Camera") float CameraBoomInterpolationSpeed = 1.f;
-	
+
+	bool bHitSomething;
+	FHitResult HitResult;
+	FCollisionQueryParams LaserTraceParams;
 };
