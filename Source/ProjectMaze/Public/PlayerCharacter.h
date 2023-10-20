@@ -89,8 +89,8 @@ protected:
 	UFUNCTION() void TimelineCameraZoomOut(const float Output) const;
 
 private:
-	UPROPERTY(EditAnywhere) float MinPitch;
-	UPROPERTY(EditAnywhere) float MaxPitch;
+	UPROPERTY(EditAnywhere, Category = "Camera") float MinPitch;
+	UPROPERTY(EditAnywhere, Category = "Camera") float MaxPitch;
 	UPROPERTY(EditAnywhere, Category = "Camera") float CurrentCameraBoomLength;
 	UPROPERTY(EditAnywhere, Category = "Camera") float DefaultCameraBoomLength = 130.f;
 	UPROPERTY(EditAnywhere, Category = "Camera") float RunningCameraBoomLength = 200.f;

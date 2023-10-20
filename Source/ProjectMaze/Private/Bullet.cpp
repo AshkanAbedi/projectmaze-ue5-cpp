@@ -42,15 +42,6 @@ void ABullet::OnBulletHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 		Destroy();
 }
 
-// ReSharper disable once CppMemberFunctionMayBeStatic
-// ReSharper disable once CppParameterMayBeConstPtrOrRef
-void ABullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	const FString OtherActorName = OtherActor->GetName();
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(1, 20.f, FColor::Red, OtherActorName);
-}
-
 void ABullet::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
