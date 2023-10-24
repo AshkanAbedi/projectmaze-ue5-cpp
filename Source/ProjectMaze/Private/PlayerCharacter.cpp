@@ -8,8 +8,9 @@
 #include "Curves/CurveFloat.h"
 #include "Camera/CameraShakeSourceComponent.h"
 #include "Components/TimelineComponent.h"
-#include "Components/StaticMeshComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Bullet.h"
+
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -35,31 +36,39 @@ APlayerCharacter::APlayerCharacter()
 	WeaponSkeletalMesh->SetupAttachment(GetMesh());
 	LaserPoint = CreateDefaultSubobject<USceneComponent>(TEXT("Laser Point"));
 	LaserPoint->SetupAttachment(WeaponSkeletalMesh);
-	BulletSpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("Bullet Spawn Point"));
-	BulletSpawnPoint->SetupAttachment(WeaponSkeletalMesh);
 }
 
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	if (IsValid(WeaponSkeletalMesh) && IsValid(LaserPoint) && IsValid (BulletSpawnPoint))
+	if (IsValid(WeaponSkeletalMesh) && IsValid(LaserPoint))
 		WeaponSkeletalMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("WeaponSocket"));
 		LaserPoint->AttachToComponent(WeaponSkeletalMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("LaserPointSocket"));
-		BulletSpawnPoint->AttachToComponent(WeaponSkeletalMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale,  FName("BulletSpawnPointSocket"));
 }
 
 void APlayerCharacter::StartMoveForward(const FInputActionInstance& Value)
 {
 	
-	if ((Controller) && (IsAiming)){
-		AddMovementInput(FVector(GetActorForwardVector()), 0.4);
+	if ((Controller) && (IsAiming))
+	{
+		AddMovementInput(FVector(GetActorForwardVector()), MovementSpeedCurve->GetFloatValue(Value.GetTriggeredTime()));
+		GetCharacterMovement()->MaxWalkSpeed = 200.f;
 		MoveInputPressed = true;
 		MoveInputReleased = false;
 	}
-	else if ((Controller) && (!IsAiming)) {
+	if ((Controller) && (!IsAiming) && (!IsRunning))
+	{
 		AddMovementInput(FVector(GetActorForwardVector()), MovementSpeedCurve->GetFloatValue(Value.GetTriggeredTime()));
-		if (UKismetMathLibrary::VSizeXY(GetCharacterMovement()->Velocity) > 250.f)
-			CurrentCameraBoomLength = RunningCameraBoomLength;
+		GetCharacterMovement()->MaxWalkSpeed = 200.f;
+		CurrentCameraBoomLength = WalkingCameraBoomLength;
+		MoveInputPressed = true;
+		MoveInputReleased = false;
+	}
+	else if ((Controller) && (!IsAiming) && (IsRunning))
+	{
+		AddMovementInput(FVector(GetActorForwardVector()), MovementSpeedCurve->GetFloatValue(Value.GetTriggeredTime()));
+		GetCharacterMovement()->MaxWalkSpeed = 500.f;
+		CurrentCameraBoomLength = RunningCameraBoomLength;
 		MoveInputPressed = true;
 		MoveInputReleased = false;
 	}
@@ -139,8 +148,11 @@ void APlayerCharacter::LookUp(const FInputActionValue& Value)
 
 void APlayerCharacter::Fire(const FInputActionInstance& Value)
 {
-	FireInputPressed = true;
-	
+	if (Bullet == nullptr)
+		return;
+	if (IsAiming)
+		FireInputPressed = true;
+		GetWorld()->SpawnActor<ABullet>(Bullet, LaserPoint->GetComponentLocation(), LaserPoint->GetComponentRotation());
 }
 
 void APlayerCharacter::StopFire()
@@ -226,7 +238,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	EnhancedInputComponent->BindAction(InputLookUp, ETriggerEvent::Triggered, this, &APlayerCharacter::LookUp);
 	EnhancedInputComponent->BindAction(InputAim, ETriggerEvent::Started, this, &APlayerCharacter::StartAim);
 	EnhancedInputComponent->BindAction(InputAim, ETriggerEvent::Completed, this, &APlayerCharacter::StopAim);
-	EnhancedInputComponent->BindAction(InputFire, ETriggerEvent::Triggered, this, &APlayerCharacter::Fire);
+	EnhancedInputComponent->BindAction(InputFire, ETriggerEvent::Started, this, &APlayerCharacter::Fire);
 	EnhancedInputComponent->BindAction(InputFire, ETriggerEvent::Completed, this, &APlayerCharacter::StopFire);
 	EnhancedInputComponent->BindAction(InputChangeCameraAngle, ETriggerEvent::Started, this, &APlayerCharacter::ChangeCameraAngle);
 

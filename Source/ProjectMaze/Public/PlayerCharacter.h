@@ -15,6 +15,7 @@ class UInputAction;
 class UCurveFloat;
 class UCameraShakeSourceComponent;
 class UTimelineComponent;
+class ABullet;
 
 UCLASS()
 class PROJECTMAZE_API APlayerCharacter : public ACharacter
@@ -38,8 +39,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon") TObjectPtr<USkeletalMeshComponent> WeaponSkeletalMesh;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon") TObjectPtr<USceneComponent> LaserPoint;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon") TObjectPtr<USceneComponent> BulletSpawnPoint;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon") float LaserTraceDistance;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Bullet") TSubclassOf<ABullet> Bullet;
 
 
 protected:
@@ -48,10 +50,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnhancedInput") TObjectPtr<UInputMappingContext> InputMappingContext;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "EnhancedInput") TObjectPtr<UInputAction> InputMoveForward;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "EnhancedInput") TObjectPtr<UInputAction> InputMoveBackward;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "EnhancedInput") TObjectPtr<UInputAction> InputStrafeRight;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "EnhancedInput") TObjectPtr<UInputAction> InputStrafeLeft;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "EnhancedInput") TObjectPtr<UInputAction> InputMoveRight;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "EnhancedInput") TObjectPtr<UInputAction> InputMoveLeft;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "EnhancedInput") TObjectPtr<UInputAction> InputLookAround;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "EnhancedInput") TObjectPtr<UInputAction> InputLookUp;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "EnhancedInput") TObjectPtr<UInputAction> InputRun;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "EnhancedInput") TObjectPtr<UInputAction> InputAim;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "EnhancedInput") TObjectPtr<UInputAction> InputFire;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "EnhancedInput") TObjectPtr<UInputAction> InputChangeCameraAngle;
@@ -61,13 +64,16 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool MoveInputReleased = false;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool MoveBackInputPressed = false;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool MoveBackInputReleased = false;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool StrafeRightInputPressed = false;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool StrafeRightInputReleased = false;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool StrafeLeftInputPressed = false;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool StrafeLeftInputReleased = false;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool MoveRightInputPressed = false;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool MoveRightInputReleased = false;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool MoveLeftInputPressed = false;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool MoveLeftInputReleased = false;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool RunInputPressed = false;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool RunInputReleased = false;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool AimInputPressed = false;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool AimInputReleased = false;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool FireInputPressed = false;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool IsRunning = false;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool IsAiming = false;
 	
 	void StartMoveForward(const FInputActionInstance& Value);
@@ -93,6 +99,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Camera") float MaxPitch;
 	UPROPERTY(EditAnywhere, Category = "Camera") float CurrentCameraBoomLength;
 	UPROPERTY(EditAnywhere, Category = "Camera") float DefaultCameraBoomLength = 130.f;
+	UPROPERTY(EditAnywhere, Category = "Camera") float WalkingCameraBoomLength = 160.f;
 	UPROPERTY(EditAnywhere, Category = "Camera") float RunningCameraBoomLength = 200.f;
 	UPROPERTY(EditAnywhere, Category = "Camera") float CameraBoomInterpolationSpeed = 1.f;
 
