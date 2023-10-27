@@ -8,7 +8,6 @@
 #include "Curves/CurveFloat.h"
 #include "Camera/CameraShakeSourceComponent.h"
 #include "Components/TimelineComponent.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Bullet.h"
 
 APlayerCharacter::APlayerCharacter()
@@ -47,9 +46,6 @@ void APlayerCharacter::BeginPlay()
 
 void APlayerCharacter::StartMoveForward(const FInputActionInstance& Value)
 {
-	// MoveInputPressed = true;
-	// MoveInputReleased = false;
-	
 	if ((Controller) && (IsAiming))
 	{
 		AddMovementInput(FVector(GetActorForwardVector()), MovementSpeedCurve->GetFloatValue(Value.GetTriggeredTime()));
@@ -238,11 +234,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	EnhancedInputComponent->BindAction(InputMoveForward, ETriggerEvent::Triggered, this, &APlayerCharacter::StartMoveForward);
 	EnhancedInputComponent->BindAction(InputMoveForward, ETriggerEvent::Completed, this, &APlayerCharacter::StopMoveForward);
 	EnhancedInputComponent->BindAction(InputMoveBackward, ETriggerEvent::Triggered, this, &APlayerCharacter::StartMoveBackward);
-	EnhancedInputComponent->BindAction(InputMoveBackward, ETriggerEvent::Completed, this, &APlayerCharacter::StopMoveBackward);
 	EnhancedInputComponent->BindAction(InputMoveRight, ETriggerEvent::Triggered, this, &APlayerCharacter::StartMoveRight);
 	EnhancedInputComponent->BindAction(InputMoveLeft, ETriggerEvent::Triggered, this, &APlayerCharacter::StartMoveLeft);
-	EnhancedInputComponent->BindAction(InputMoveRight, ETriggerEvent::Completed, this, &APlayerCharacter::StopMoveRight);
-	EnhancedInputComponent->BindAction(InputMoveLeft, ETriggerEvent::Completed, this, &APlayerCharacter::StopMoveLeft);
 	EnhancedInputComponent->BindAction(InputRun, ETriggerEvent::Started, this, &APlayerCharacter::StartRun);
 	EnhancedInputComponent->BindAction(InputRun, ETriggerEvent::Completed, this, &APlayerCharacter::StopRun);
 	EnhancedInputComponent->BindAction(InputLookAround, ETriggerEvent::Triggered, this, &APlayerCharacter::Turn);
