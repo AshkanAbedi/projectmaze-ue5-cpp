@@ -11,7 +11,6 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Bullet.h"
 
-
 APlayerCharacter::APlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -48,89 +47,98 @@ void APlayerCharacter::BeginPlay()
 
 void APlayerCharacter::StartMoveForward(const FInputActionInstance& Value)
 {
+	// MoveInputPressed = true;
+	// MoveInputReleased = false;
 	
 	if ((Controller) && (IsAiming))
 	{
 		AddMovementInput(FVector(GetActorForwardVector()), MovementSpeedCurve->GetFloatValue(Value.GetTriggeredTime()));
 		GetCharacterMovement()->MaxWalkSpeed = 200.f;
-		MoveInputPressed = true;
-		MoveInputReleased = false;
 	}
 	if ((Controller) && (!IsAiming) && (!IsRunning))
 	{
 		AddMovementInput(FVector(GetActorForwardVector()), MovementSpeedCurve->GetFloatValue(Value.GetTriggeredTime()));
 		GetCharacterMovement()->MaxWalkSpeed = 200.f;
 		CurrentCameraBoomLength = WalkingCameraBoomLength;
-		MoveInputPressed = true;
-		MoveInputReleased = false;
 	}
 	else if ((Controller) && (!IsAiming) && (IsRunning))
 	{
 		AddMovementInput(FVector(GetActorForwardVector()), MovementSpeedCurve->GetFloatValue(Value.GetTriggeredTime()));
 		GetCharacterMovement()->MaxWalkSpeed = 500.f;
 		CurrentCameraBoomLength = RunningCameraBoomLength;
-		MoveInputPressed = true;
-		MoveInputReleased = false;
 	}
 }
 
 void APlayerCharacter::StopMoveForward()
 {
-	MoveInputReleased = true;
-	MoveInputPressed = false;
 	CurrentCameraBoomLength = DefaultCameraBoomLength;
 }
 
 void APlayerCharacter::StartMoveBackward(const FInputActionInstance& Value)
 {
-	
 	if ((Controller) && (IsAiming))
 	{
-		AddMovementInput(FVector(GetActorForwardVector() * -1), 0.4);
-		MoveBackInputPressed = true;
-		MoveBackInputReleased = false;
+		AddMovementInput(FVector(GetActorForwardVector() * -1), MovementSpeedCurve->GetFloatValue(Value.GetTriggeredTime()));
+		GetCharacterMovement()->MaxWalkSpeed = 200.f;
+	}
+	if ((Controller) && (!IsAiming) && (!IsRunning))
+	{
+		AddMovementInput(FVector(GetActorForwardVector() * -1), MovementSpeedCurve->GetFloatValue(Value.GetTriggeredTime()));
+		GetCharacterMovement()->MaxWalkSpeed = 200.f;
+	}
+	else if ((Controller) && (!IsAiming) && (IsRunning))
+	{
+		AddMovementInput(FVector(GetActorForwardVector() * -1), MovementSpeedCurve->GetFloatValue(Value.GetTriggeredTime()));
+		GetCharacterMovement()->MaxWalkSpeed = 500.f;
 	}
 }
 
-void APlayerCharacter::StopMoveBackward()
+void APlayerCharacter::StartMoveRight(const FInputActionInstance& Value)
 {
-	MoveBackInputPressed = false;
-	MoveBackInputReleased = true;
-}
-
-void APlayerCharacter::StrafeRight(const FInputActionInstance& Value)
-{
-	
 	if ((Controller) && (IsAiming))
 	{
-		StrafeRightInputPressed = true;
-		StrafeRightInputReleased = false;
-		AddMovementInput(FVector(GetActorRightVector()), 0.3);
+		AddMovementInput(FVector(GetActorRightVector()), MovementSpeedCurve->GetFloatValue(Value.GetTriggeredTime()));
+		GetCharacterMovement()->MaxWalkSpeed = 200.f;
+	}
+	if ((Controller) && (!IsAiming) && (!IsRunning))
+	{
+		AddMovementInput(FVector(GetActorRightVector()), MovementSpeedCurve->GetFloatValue(Value.GetTriggeredTime()));
+		GetCharacterMovement()->MaxWalkSpeed = 200.f;
+	}
+	else if ((Controller) && (!IsAiming) && (IsRunning))
+	{
+		AddMovementInput(FVector(GetActorRightVector()), MovementSpeedCurve->GetFloatValue(Value.GetTriggeredTime()));
+		GetCharacterMovement()->MaxWalkSpeed = 500.f;
 	}
 }
 
-void APlayerCharacter::StrafeLeft(const FInputActionInstance& Value)
+void APlayerCharacter::StartMoveLeft(const FInputActionInstance& Value)
 {
-	
 	if ((Controller) && (IsAiming))
 	{
-		StrafeLeftInputPressed = true;
-		StrafeLeftInputReleased = false;
-		AddMovementInput(FVector(GetActorRightVector() * -1), 0.3);
+		AddMovementInput(FVector(GetActorRightVector() * -1.f), MovementSpeedCurve->GetFloatValue(Value.GetTriggeredTime()));
+		GetCharacterMovement()->MaxWalkSpeed = 200.f;
 	}
-	
+	if ((Controller) && (!IsAiming) && (!IsRunning))
+	{
+		AddMovementInput(FVector(GetActorRightVector() * -1.f), MovementSpeedCurve->GetFloatValue(Value.GetTriggeredTime()));
+		GetCharacterMovement()->MaxWalkSpeed = 200.f;
+	}
+	else if ((Controller) && (!IsAiming) && (IsRunning))
+	{
+		AddMovementInput(FVector(GetActorRightVector() * -1.f), MovementSpeedCurve->GetFloatValue(Value.GetTriggeredTime()));
+		GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	}
 }
 
-void APlayerCharacter::StopStrafeRight()
+void APlayerCharacter::StartRun()
 {
-	StrafeRightInputPressed = false;
-	StrafeRightInputReleased = true;
+	IsRunning = true;
 }
 
-void APlayerCharacter::StopStrafeLeft()
+void APlayerCharacter::StopRun()
 {
-	StrafeLeftInputPressed = false;
-	StrafeLeftInputReleased = true;
+	IsRunning = false;
 }
 
 void APlayerCharacter::Turn(const FInputActionValue& Value)
@@ -214,11 +222,12 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	CameraBoom->TargetArmLength = FMath::FInterpTo(CameraBoom->TargetArmLength, CurrentCameraBoomLength, DeltaTime, CameraBoomInterpolationSpeed);
-
+	LaserPoint->SetWorldRotation(CameraBoom->GetTargetRotation());
+	
 	if (IsAiming)
 		bHitSomething = GetWorld()->LineTraceSingleByChannel(HitResult, LaserPoint->GetComponentLocation(), LaserPoint->GetComponentLocation() + (LaserPoint->GetForwardVector() * LaserTraceDistance), ECC_Visibility, LaserTraceParams);
 		DrawDebugLine(GetWorld(), LaserPoint->GetComponentLocation(), LaserPoint->GetComponentLocation() + (LaserPoint->GetForwardVector() * LaserTraceDistance), FColor::Red, false, -1.f, 0, 1.f);
-		LaserPoint->SetWorldRotation(CameraBoom->GetTargetRotation());
+		
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -230,10 +239,12 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	EnhancedInputComponent->BindAction(InputMoveForward, ETriggerEvent::Completed, this, &APlayerCharacter::StopMoveForward);
 	EnhancedInputComponent->BindAction(InputMoveBackward, ETriggerEvent::Triggered, this, &APlayerCharacter::StartMoveBackward);
 	EnhancedInputComponent->BindAction(InputMoveBackward, ETriggerEvent::Completed, this, &APlayerCharacter::StopMoveBackward);
-	EnhancedInputComponent->BindAction(InputStrafeRight, ETriggerEvent::Triggered, this, &APlayerCharacter::StrafeRight);
-	EnhancedInputComponent->BindAction(InputStrafeLeft, ETriggerEvent::Triggered, this, &APlayerCharacter::StrafeLeft);
-	EnhancedInputComponent->BindAction(InputStrafeRight, ETriggerEvent::Completed, this, &APlayerCharacter::StopStrafeRight);
-	EnhancedInputComponent->BindAction(InputStrafeLeft, ETriggerEvent::Completed, this, &APlayerCharacter::StopStrafeLeft);
+	EnhancedInputComponent->BindAction(InputMoveRight, ETriggerEvent::Triggered, this, &APlayerCharacter::StartMoveRight);
+	EnhancedInputComponent->BindAction(InputMoveLeft, ETriggerEvent::Triggered, this, &APlayerCharacter::StartMoveLeft);
+	EnhancedInputComponent->BindAction(InputMoveRight, ETriggerEvent::Completed, this, &APlayerCharacter::StopMoveRight);
+	EnhancedInputComponent->BindAction(InputMoveLeft, ETriggerEvent::Completed, this, &APlayerCharacter::StopMoveLeft);
+	EnhancedInputComponent->BindAction(InputRun, ETriggerEvent::Started, this, &APlayerCharacter::StartRun);
+	EnhancedInputComponent->BindAction(InputRun, ETriggerEvent::Completed, this, &APlayerCharacter::StopRun);
 	EnhancedInputComponent->BindAction(InputLookAround, ETriggerEvent::Triggered, this, &APlayerCharacter::Turn);
 	EnhancedInputComponent->BindAction(InputLookUp, ETriggerEvent::Triggered, this, &APlayerCharacter::LookUp);
 	EnhancedInputComponent->BindAction(InputAim, ETriggerEvent::Started, this, &APlayerCharacter::StartAim);
