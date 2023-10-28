@@ -17,7 +17,6 @@ APlayerCharacter::APlayerCharacter()
 	CameraBoom->SetupAttachment(GetRootComponent());
 	CameraBoom->TargetArmLength = 130.f;
 	CameraBoom->SetRelativeLocation(FVector (0, 40, 80));
-	CurrentCameraBoomLength = DefaultCameraBoomLength;
 
 	MainCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Main Camera"));
 	MainCamera->SetupAttachment(CameraBoom);
@@ -39,9 +38,19 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	CurrentCameraBoomLength = DefaultCameraBoomLength;
+	GetWorld()->GetTimerManager().SetTimer(LaserTimerHandle, this, &APlayerCharacter::LaserTimer, 0.016f, true);
+	
 	if (IsValid(WeaponSkeletalMesh) && IsValid(LaserPoint))
 		WeaponSkeletalMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("WeaponSocket"));
 		LaserPoint->AttachToComponent(WeaponSkeletalMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("LaserPointSocket"));
+}
+
+void APlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	GetWorld()->GetTimerManager().ClearTimer(AimingTimerHandle);
+	GetWorld()->GetTimerManager().ClearTimer(LaserTimerHandle);
 }
 
 void APlayerCharacter::StartMoveForward(const FInputActionInstance& Value)
@@ -154,14 +163,20 @@ void APlayerCharacter::Fire(const FInputActionInstance& Value)
 {
 	if (Bullet == nullptr)
 		return;
-	if (IsAiming)
-		FireInputPressed = true;
+	if (IsAiming == true)
+	{
 		GetWorld()->SpawnActor<ABullet>(Bullet, LaserPoint->GetComponentLocation(), LaserPoint->GetComponentRotation());
+		IsFiring = true;
+	}
+	else
+	{
+		return;
+	}	
 }
 
 void APlayerCharacter::StopFire()
 {
-	FireInputPressed = false;
+	IsFiring = false;
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
@@ -175,8 +190,7 @@ void APlayerCharacter::ChangeCameraAngle()
 void APlayerCharacter::StartAim()
 {
 	IsAiming = true;
-	AimInputPressed = true;
-	AimInputReleased = false;
+	GetWorld()->GetTimerManager().SetTimer(AimingTimerHandle, this, &APlayerCharacter::AimingTimer, 0.016f, true);
 
 	if (!CameraZoomInCurve || !CameraZoomOutCurve)
 	{
@@ -195,13 +209,24 @@ void APlayerCharacter::StartAim()
 void APlayerCharacter::StopAim()
 {
 	IsAiming = false;
-	AimInputPressed = false;
-	AimInputReleased = true;
+	GetWorld()->GetTimerManager().ClearTimer(AimingTimerHandle);
+	
 	FOnTimelineFloat TimelineTickDelegate;
 	TimelineTickDelegate.BindUFunction(this, "TimelineCameraZoomOut");
 	TimelineComponent->AddInterpFloat(CameraZoomOutCurve, TimelineTickDelegate);
 	TimelineComponent->SetTimelineLength(ETimelineLengthMode::TL_TimelineLength);
 	TimelineComponent->PlayFromStart();
+}
+
+void APlayerCharacter::AimingTimer()
+{
+	bHitSomething = GetWorld()->LineTraceSingleByChannel(HitResult, LaserPoint->GetComponentLocation(), LaserPoint->GetComponentLocation() + (LaserPoint->GetForwardVector() * LaserTraceDistance), ECC_Visibility, LaserTraceParams);
+	DrawDebugLine(GetWorld(), LaserPoint->GetComponentLocation(), LaserPoint->GetComponentLocation() + (LaserPoint->GetForwardVector() * LaserTraceDistance), FColor::Red, false, -1.f, 0, 1.f);
+}
+
+void APlayerCharacter::LaserTimer()
+{
+	LaserPoint->SetWorldRotation(CameraBoom->GetTargetRotation());
 }
 
 void APlayerCharacter::TimelineCameraZoomIn(const float Output) const
@@ -218,12 +243,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	CameraBoom->TargetArmLength = FMath::FInterpTo(CameraBoom->TargetArmLength, CurrentCameraBoomLength, DeltaTime, CameraBoomInterpolationSpeed);
-	LaserPoint->SetWorldRotation(CameraBoom->GetTargetRotation());
-	
-	if (IsAiming)
-		bHitSomething = GetWorld()->LineTraceSingleByChannel(HitResult, LaserPoint->GetComponentLocation(), LaserPoint->GetComponentLocation() + (LaserPoint->GetForwardVector() * LaserTraceDistance), ECC_Visibility, LaserTraceParams);
-		DrawDebugLine(GetWorld(), LaserPoint->GetComponentLocation(), LaserPoint->GetComponentLocation() + (LaserPoint->GetForwardVector() * LaserTraceDistance), FColor::Red, false, -1.f, 0, 1.f);
-		
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -245,7 +264,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	EnhancedInputComponent->BindAction(InputFire, ETriggerEvent::Started, this, &APlayerCharacter::Fire);
 	EnhancedInputComponent->BindAction(InputFire, ETriggerEvent::Completed, this, &APlayerCharacter::StopFire);
 	EnhancedInputComponent->BindAction(InputChangeCameraAngle, ETriggerEvent::Started, this, &APlayerCharacter::ChangeCameraAngle);
-
 	
 }
 

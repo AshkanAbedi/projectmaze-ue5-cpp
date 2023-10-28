@@ -13,12 +13,12 @@ class PROJECTMAZE_API ABulletSpawner : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
+// public:	
 	ABulletSpawner();
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly) TObjectPtr<USceneComponent> BulletSpawnerRoot;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly) TSubclassOf<class ABullet> Bullet;
-	
-	UFUNCTION() void FireBullet(const FVector& StartingLocation, const FRotator& StartingRotation) const;
+// 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly) TObjectPtr<USceneComponent> BulletSpawnerRoot;
+// 	UPROPERTY(EditAnywhere, BlueprintReadOnly) TSubclassOf<class ABullet> Bullet;
+// 	
+// 	UFUNCTION() void FireBullet(const FVector& StartingLocation, const FRotator& StartingRotation) const;
 
 protected:
 	virtual void BeginPlay() override;

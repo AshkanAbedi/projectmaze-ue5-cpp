@@ -43,9 +43,17 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Bullet") TSubclassOf<ABullet> Bullet;
 
+	FTimerHandle LaserTimerHandle;
+	int32 LaserTimerCount = 0;
+	
+	FTimerHandle AimingTimerHandle;
+	int32 AimingTimerCount = 0;
+
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnhancedInput") TObjectPtr<UInputMappingContext> InputMappingContext;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "EnhancedInput") TObjectPtr<UInputAction> InputMoveForward;
@@ -60,11 +68,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "EnhancedInput") TObjectPtr<UInputAction> InputChangeCameraAngle;
 	
 	UPROPERTY(EditAnywhere, Category = "EnhancedInput") float LookUpSensitivity = 1.f;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool RunInputPressed = false;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool RunInputReleased = false;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool AimInputPressed = false;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool AimInputReleased = false;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool FireInputPressed = false;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool IsFiring = false;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool IsRunning = false;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool IsAiming = false;
 	
@@ -82,6 +86,8 @@ protected:
 	void ChangeCameraAngle();
 	void StartAim();
 	void StopAim();
+	void AimingTimer();
+	void LaserTimer();
 	UFUNCTION() void TimelineCameraZoomIn(const float Output) const;
 	UFUNCTION() void TimelineCameraZoomOut(const float Output) const;
 
@@ -89,12 +95,16 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Camera") float MinPitch;
 	UPROPERTY(EditAnywhere, Category = "Camera") float MaxPitch;
 	UPROPERTY(EditAnywhere, Category = "Camera") float CurrentCameraBoomLength;
-	UPROPERTY(EditAnywhere, Category = "Camera") float DefaultCameraBoomLength = 130.f;
-	UPROPERTY(EditAnywhere, Category = "Camera") float WalkingCameraBoomLength = 160.f;
-	UPROPERTY(EditAnywhere, Category = "Camera") float RunningCameraBoomLength = 200.f;
-	UPROPERTY(EditAnywhere, Category = "Camera") float CameraBoomInterpolationSpeed = 1.f;
+	UPROPERTY(EditAnywhere, Category = "Camera") float DefaultCameraBoomLength;
+	UPROPERTY(EditAnywhere, Category = "Camera") float WalkingCameraBoomLength;
+	UPROPERTY(EditAnywhere, Category = "Camera") float RunningCameraBoomLength;
+	UPROPERTY(EditAnywhere, Category = "Camera") float CameraBoomInterpolationSpeed;
 
 	bool bHitSomething;
 	FHitResult HitResult;
 	FCollisionQueryParams LaserTraceParams;
+
+public:
+	[[nodiscard]] bool HitSomething() const { return bHitSomething;}
+	[[nodiscard]] FHitResult HitResult1() const{ return HitResult;}
 };
