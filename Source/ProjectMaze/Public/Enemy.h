@@ -18,28 +18,28 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void Tick(float DeltaTime) override;
 
-
-
+	bool bIsInPatrolTargetRadius = false;
+	FTimerHandle WaitTimerHandle;
+	FTimerHandle CheckDistanceTimerHandle;
+	
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 #pragma region Navigation
 
 	UPROPERTY() AAIController* AIController;
-	UPROPERTY() FTimerHandle WaitTimerHandle;
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation") TArray<AActor*> PatrolTargets;
-	UPROPERTY(EditInstanceOnly, Category = "AI Navigation") AActor* FirstPatrolTarget;
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation") AActor* NextPatrolTarget;
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation") AActor* CurrentPatrolTarget;
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation") float PatrolTargetRadius;
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation") float WaitMin;
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation") float WaitMax;
-	
-	UFUNCTION() void MoveToPatrolTarget(AActor* PatrolTarget);
-	UFUNCTION() void SelectRandomPatrolTarget();
-	UFUNCTION() bool IsInPatrolTargetRadius() const;
-	UFUNCTION() void ChoosePatrolTarget();
-	UFUNCTION() void WaitTimeFinished();
+
+	void CheckTimer();
+	void MoveToPatrolTarget(AActor* PatrolTarget);
+	void SelectRandomPatrolTarget();
+	void IsInPatrolTargetRadius();
 
 #pragma endregion Navigation
 

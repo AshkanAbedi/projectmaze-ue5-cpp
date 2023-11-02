@@ -19,7 +19,14 @@ void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	AIController = Cast<AAIController>(GetController());
-	MoveToPatrolTarget(FirstPatrolTarget);
+	SelectRandomPatrolTarget();
+}
+
+void AEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	GetWorldTimerManager().ClearTimer(CheckDistanceTimerHandle);
+	GetWorldTimerManager().ClearTimer(WaitTimerHandle);
 }
 
 void AEnemy::SelectRandomPatrolTarget()
@@ -29,42 +36,33 @@ void AEnemy::SelectRandomPatrolTarget()
 	{
 		const int32 RandomIndex = FMath::RandRange(0, NumPatrolTargets - 1);
 		NextPatrolTarget = PatrolTargets[RandomIndex];
-		if(GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Next Patrol Target: %s"), *NextPatrolTarget->GetName()));
+		MoveToPatrolTarget(NextPatrolTarget);
+		GetWorldTimerManager().ClearTimer(WaitTimerHandle);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Next Patrol Target: %s"), *NextPatrolTarget->GetName()));
 	}
 }
 
-bool AEnemy::IsInPatrolTargetRadius() const
+void AEnemy::IsInPatrolTargetRadius()
 {
 	const double Distance = (GetActorLocation() - CurrentPatrolTarget->GetActorLocation()).Size();
 	GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("Distance: %f"), Distance));
-	return Distance <= PatrolTargetRadius;
-}
-
-void AEnemy::ChoosePatrolTarget()
-{
-	const float WaitTime = FMath::RandRange(WaitMin, WaitMax);
-	GetWorldTimerManager().SetTimer(WaitTimerHandle, this, &AEnemy::WaitTimeFinished, WaitTime, false, 3.f);
-}
-
-void AEnemy::WaitTimeFinished()
-{
-	MoveToPatrolTarget(NextPatrolTarget);
+	if (Distance <= PatrolTargetRadius)
+		GetWorldTimerManager().ClearTimer(CheckDistanceTimerHandle);
+		GetWorld()->GetTimerManager().SetTimer(WaitTimerHandle, this, &AEnemy::SelectRandomPatrolTarget, FMath::RandRange(WaitMin, WaitMax), false);
+		bIsInPatrolTargetRadius = true;
 }
 
 void AEnemy::MoveToPatrolTarget(AActor* PatrolTarget)
 {
 	if (AIController)
 		AIController->MoveToActor(PatrolTarget, 20.f);
+		GetWorldTimerManager().SetTimer(CheckDistanceTimerHandle, this, &AEnemy::IsInPatrolTargetRadius, 0.1, true);
 		CurrentPatrolTarget = PatrolTarget;
 }
 
 void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (IsInPatrolTargetRadius())
-		SelectRandomPatrolTarget();
-		WaitTimeFinished();
 }
 
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
