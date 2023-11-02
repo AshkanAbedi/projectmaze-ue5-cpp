@@ -8,7 +8,7 @@ public class ProjectMaze : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayCameras",  "AnimGraphRuntime"});
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayCameras",  "AnimGraphRuntime", "AIModule"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {});
 
