@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "InputAction.h"
 #include "InputActionValue.h"
+#include "CharacterStates.h"
 #include "PlayerCharacter.generated.h"
 
 class UStaticMeshComponent;
@@ -49,11 +50,12 @@ public:
 	FTimerHandle AimingTimerHandle;
 	int32 AimingTimerCount = 0;
 
+	EPlayerState PlayerState;
+
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnhancedInput") TObjectPtr<UInputMappingContext> InputMappingContext;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "EnhancedInput") TObjectPtr<UInputAction> InputMoveForward;

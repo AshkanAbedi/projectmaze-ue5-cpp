@@ -38,6 +38,9 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	Tags.Add(FName("Player"));
+	PlayerState = EPlayerState::EPS_Idle;
+	
 	CurrentCameraBoomLength = DefaultCameraBoomLength;
 	GetWorld()->GetTimerManager().SetTimer(LaserTimerHandle, this, &APlayerCharacter::LaserTimer, 0.016f, true);
 	
@@ -224,6 +227,7 @@ void APlayerCharacter::AimingTimer()
 	DrawDebugLine(GetWorld(), LaserPoint->GetComponentLocation(), LaserPoint->GetComponentLocation() + (LaserPoint->GetForwardVector() * LaserTraceDistance), FColor::Red, false, -1.f, 0, 1.f);
 }
 
+// ReSharper disable once CppMemberFunctionMayBeConst
 void APlayerCharacter::LaserTimer()
 {
 	LaserPoint->SetWorldRotation(CameraBoom->GetTargetRotation());
