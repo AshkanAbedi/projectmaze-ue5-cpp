@@ -7,9 +7,13 @@
 #include "CharacterStates.h"
 #include "Enemy.generated.h"
 
+#pragma region Forward Declarations
+
 class APlayerCharacter;
 class AAIController;
 class UPawnSensingComponent;
+
+#pragma endregion Forward Declarations
 
 UCLASS()
 class PROJECTMAZE_API AEnemy : public ACharacter
@@ -20,7 +24,6 @@ public:
 	AEnemy();
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void Tick(float DeltaTime) override;
-
 	EEnemyState EnemyState;
 
 protected:
@@ -33,9 +36,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Pawn Sensing") TObjectPtr<UPawnSensingComponent> PawnSensingComponent;
 
 	UFUNCTION() void OnSeePawn(APawn* Pawn);
-	UFUNCTION() void IgnorePawn();
 
-	FTimerHandle AlertTimerHandle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pawn Sensing") float InnerChaseRadius;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pawn Sensing") float OuterChaseRadius;
 	
 #pragma endregion PawnSensing
 	
@@ -50,13 +53,18 @@ protected:
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation") float WaitMax;
 	
 	void MoveToPatrolTarget(AActor* PatrolTarget);
-	void SelectRandomPatrolTarget();
+	void Patrolling();
 	void IsInPatrolTargetRadius();
 
-	FTimerHandle WaitTimerHandle;
-	FTimerHandle CheckDistanceTimerHandle;
-
 #pragma endregion Navigation
+
+#pragma region TimerHandles
+	
+	FTimerHandle CheckDistanceTimerHandle;
+	FTimerHandle WaitTimerHandle;
+	FTimerHandle ChaseTimerHandle;
+	
+#pragma endregion TimerHandles
 
 private:
 	

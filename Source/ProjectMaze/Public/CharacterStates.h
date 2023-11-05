@@ -19,7 +19,7 @@ enum class EEnemyState : uint8
 {
 	EES_Idle UMETA(DisplayName = "Idle"),
 	EES_Patrolling UMETA(DisplayName = "Patrolling"),
-	EES_Alert UMETA(DisplayName = "Alert"),
+	EES_Chasing UMETA(DisplayName = "Chasing"),
 	EES_RunningToPlayer UMETA(DisplayName = "runningToPlayer"),
 	EES_Attacking UMETA(DisplayName = "Attacking"),
 	EES_Hit UMETA(DisplayName = "Hit"),

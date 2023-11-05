@@ -9,6 +9,8 @@
 #include "CharacterStates.h"
 #include "PlayerCharacter.generated.h"
 
+#pragma region Forward Declarations
+
 class UStaticMeshComponent;
 class USpringArmComponent;
 class UCameraComponent;
@@ -17,6 +19,8 @@ class UCurveFloat;
 class UCameraShakeSourceComponent;
 class UTimelineComponent;
 class ABullet;
+
+#pragma endregion Forward Declarations
 
 UCLASS()
 class PROJECTMAZE_API APlayerCharacter : public ACharacter
@@ -27,7 +31,9 @@ public:
 	APlayerCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-	
+	EPlayerState PlayerState;
+
+#pragma region Character Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera") TObjectPtr<USpringArmComponent> CameraBoom;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera") TObjectPtr<UCameraComponent> MainCamera;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera") TObjectPtr<UCameraShakeSourceComponent> CameraShakeSourceComponent;
@@ -44,18 +50,23 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Bullet") TSubclassOf<ABullet> Bullet;
 
+#pragma endregion Character Components
+
+#pragma region Timer Handles
+
 	FTimerHandle LaserTimerHandle;
 	int32 LaserTimerCount = 0;
 	
 	FTimerHandle AimingTimerHandle;
 	int32 AimingTimerCount = 0;
 
-	EPlayerState PlayerState;
-
+#pragma endregion Timer Handles
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+#pragma region EnhancedInput
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnhancedInput") TObjectPtr<UInputMappingContext> InputMappingContext;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "EnhancedInput") TObjectPtr<UInputAction> InputMoveForward;
@@ -73,7 +84,10 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool IsFiring = false;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool IsRunning = false;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput") bool IsAiming = false;
-	
+
+#pragma endregion EnhancedInput
+
+#pragma region Functions
 	void StartMoveForward(const FInputActionInstance& Value);
 	void StopMoveForward();
 	void StartMoveBackward(const FInputActionInstance& Value);
@@ -92,8 +106,11 @@ protected:
 	void LaserTimer();
 	UFUNCTION() void TimelineCameraZoomIn(const float Output) const;
 	UFUNCTION() void TimelineCameraZoomOut(const float Output) const;
+#pragma endregion Functions
 
 private:
+#pragma region Camera
+	
 	UPROPERTY(EditAnywhere, Category = "Camera") float MinPitch;
 	UPROPERTY(EditAnywhere, Category = "Camera") float MaxPitch;
 	UPROPERTY(EditAnywhere, Category = "Camera") float CurrentCameraBoomLength;
@@ -101,12 +118,22 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Camera") float WalkingCameraBoomLength;
 	UPROPERTY(EditAnywhere, Category = "Camera") float RunningCameraBoomLength;
 	UPROPERTY(EditAnywhere, Category = "Camera") float CameraBoomInterpolationSpeed;
+	
+#pragma endregion Camera
 
+#pragma region Tracing
+	
 	bool bHitSomething;
 	FHitResult HitResult;
 	FCollisionQueryParams LaserTraceParams;
 
+#pragma endregion Tracing
+
 public:
+#pragma region Getter and Setters
+	
 	[[nodiscard]] bool HitSomething() const { return bHitSomething;}
 	[[nodiscard]] FHitResult HitResult1() const{ return HitResult;}
+	
+#pragma endregion Getter and Setters
 };
