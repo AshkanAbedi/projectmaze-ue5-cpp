@@ -4,7 +4,6 @@
 #include "Enemy.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "AIController.h"
-#include "PlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Perception/PawnSensingComponent.h"
 
@@ -41,6 +40,32 @@ void AEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	GetWorldTimerManager().ClearTimer(ChaseTimerHandle);
 }
 
+void AEnemy::Patrolling()
+{
+	const int32 NumPatrolTargets = PatrolTargets.Num();
+	if (NumPatrolTargets > 0)
+	{
+		const int32 RandomIndex = FMath::RandRange(0, NumPatrolTargets - 1);
+		NextTarget = PatrolTargets[RandomIndex];
+		GetCharacterMovement()->MaxWalkSpeed = 110.f;
+		MoveToTarget(NextTarget);
+		EnemyState = EEnemyState::EES_Patrolling;
+		GetWorldTimerManager().SetTimer(CheckDistanceTimerHandle, this, &AEnemy::CheckPatrolTargetDistance, 0.1, true);
+		GetWorldTimerManager().ClearTimer(WaitTimerHandle);
+		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("Next Patrol Target: %s"), *NextTarget->GetName()));
+	}
+}
+
+void AEnemy::CheckPatrolTargetDistance()
+{
+	const double Distance = (GetActorLocation() - CurrentTarget->GetActorLocation()).Size();
+	GEngine->AddOnScreenDebugMessage(2, 5.f, FColor::Red, FString::Printf(TEXT("Distance: %f"), Distance));
+	
+	if (Distance <= PatrolTargetRadius)
+		GetWorldTimerManager().ClearTimer(CheckDistanceTimerHandle);
+		GetWorld()->GetTimerManager().SetTimer(WaitTimerHandle, this, &AEnemy::Patrolling, FMath::RandRange(WaitMin, WaitMax), false);
+}
+
 // ReSharper disable once CppMemberFunctionMayBeConst
 void AEnemy::OnSeePawn(APawn* Pawn)
 {
@@ -49,44 +74,16 @@ void AEnemy::OnSeePawn(APawn* Pawn)
 		GetCharacterMovement()->MaxWalkSpeed = 350.f;
 		GetWorldTimerManager().ClearTimer(CheckDistanceTimerHandle);
 		GetWorldTimerManager().ClearTimer(WaitTimerHandle);
-		AIController->MoveToActor(Pawn, 10.f);
-
-		const double DistanceToPlayer = (GetActorLocation() - UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)->GetActorLocation()).Size();
-		GEngine->AddOnScreenDebugMessage(3, 5.f, FColor::Red, FString::Printf(TEXT("Distance to Player: %f"), DistanceToPlayer));
-		if (DistanceToPlayer >= OuterChaseRadius)
+		MoveToTarget(Pawn);
+		if (!PawnSensingComponent->CouldSeePawn(Pawn, true) && EnemyState == EEnemyState::EES_Chasing)
 			Patrolling();
 }
 
-void AEnemy::Patrolling()
-{
-	const int32 NumPatrolTargets = PatrolTargets.Num();
-	if (NumPatrolTargets > 0)
-	{
-		const int32 RandomIndex = FMath::RandRange(0, NumPatrolTargets - 1);
-		NextPatrolTarget = PatrolTargets[RandomIndex];
-		GetCharacterMovement()->MaxWalkSpeed = 110.f;
-		MoveToPatrolTarget(NextPatrolTarget);
-		GetWorldTimerManager().ClearTimer(WaitTimerHandle);
-		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("Next Patrol Target: %s"), *NextPatrolTarget->GetName()));
-	}
-}
-
-void AEnemy::IsInPatrolTargetRadius()
-{
-	const double Distance = (GetActorLocation() - CurrentPatrolTarget->GetActorLocation()).Size();
-	GEngine->AddOnScreenDebugMessage(2, 5.f, FColor::Red, FString::Printf(TEXT("Distance: %f"), Distance));
-	
-	if (Distance <= PatrolTargetRadius)
-		GetWorldTimerManager().ClearTimer(CheckDistanceTimerHandle);
-		GetWorld()->GetTimerManager().SetTimer(WaitTimerHandle, this, &AEnemy::Patrolling, FMath::RandRange(WaitMin, WaitMax), false);
-}
-
-void AEnemy::MoveToPatrolTarget(AActor* PatrolTarget)
+void AEnemy::MoveToTarget(AActor* Target)
 {
 	if (AIController)
-		AIController->MoveToActor(PatrolTarget, 20.f);
-		GetWorldTimerManager().SetTimer(CheckDistanceTimerHandle, this, &AEnemy::IsInPatrolTargetRadius, 0.1, true);
-		CurrentPatrolTarget = PatrolTarget;
+		AIController->MoveToActor(Target, 20.f);
+		CurrentTarget = Target;
 }
 
 void AEnemy::Tick(float DeltaTime)
