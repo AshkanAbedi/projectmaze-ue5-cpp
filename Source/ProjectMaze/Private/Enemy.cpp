@@ -4,7 +4,6 @@
 #include "Enemy.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "AIController.h"
-#include "Kismet/GameplayStatics.h"
 #include "Perception/PawnSensingComponent.h"
 
 AEnemy::AEnemy()
@@ -29,6 +28,7 @@ void AEnemy::BeginPlay()
 	EnemyState = EEnemyState::EES_Patrolling;
 
 	Patrolling();
+	
 	PawnSensingComponent->OnSeePawn.AddDynamic(this, &AEnemy::OnSeePawn);
 }
 
