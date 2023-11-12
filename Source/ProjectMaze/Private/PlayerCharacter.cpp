@@ -224,7 +224,8 @@ void APlayerCharacter::StopAim()
 void APlayerCharacter::AimingTimer()
 {
 	bHitSomething = GetWorld()->LineTraceSingleByChannel(HitResult, LaserPoint->GetComponentLocation(), LaserPoint->GetComponentLocation() + (LaserPoint->GetForwardVector() * LaserTraceDistance), ECC_Visibility, LaserTraceParams);
-	DrawDebugLine(GetWorld(), LaserPoint->GetComponentLocation(), LaserPoint->GetComponentLocation() + (LaserPoint->GetForwardVector() * LaserTraceDistance), FColor::Red, false, -1.f, 0, 1.f);
+	DrawDebugLine(GetWorld(), LaserPoint->GetComponentLocation(), LaserPoint->GetComponentLocation() + (LaserPoint->GetForwardVector() * LaserTraceDistance), FColor::Green, false, -1.f, 1, 1.f);
+	
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
